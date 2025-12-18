@@ -59,6 +59,7 @@ services:
       context: .
       dockerfile: ./.resources/Dockerfile
     ports:
+      - "8069:8069"
       - "${PORT_SERVICE_HOST_ODOO}:${PORT_SERVICE_CONTAINER_ODOO}"
     depends_on:
       - db
@@ -69,10 +70,21 @@ services:
       - ./src:/home/odoo/src
       - ./.resources/.coveragerc:/home/odoo/.coveragerc
       - odoo_data:/home/odoo/data
-      - py3:/usr/local/lib/
-      - py:/usr/lib/
+      # - py3:/usr/local/lib/
+      # - py:/usr/lib/
       - ./src/custom:/home/docker-odoo/src/custom:rw
-    command: odoo --dev=all
+    #command: odoo --dev=all
+    entrypoint: []
+    command: 
+      - odoo
+      - --db_host=db
+      - --db_user=odoo
+      - --db_password=odoo
+      - --database=postgres
+      - --addons-path=/usr/lib/python3/dist-packages/odoo/addons,/home/odoo/src/custom/binaural
+      # - -i base
+      - --dev=all
+    user: root
     labels:
       - traefik.enable=true
       - traefik.frontend.port=8069
@@ -85,6 +97,7 @@ services:
       # traefik.frontend.redirect.regex: $strTraefikRedirectRegex
       # traefik.frontend.redirect.replacement: $strTraefikRedirectReplacement
     environment:
+      WAIT_FOR_DB: "false"
       CUSTOM_CONFIG: |-
         [options]
       CUSTOM_REQUIREMTNS: |-
